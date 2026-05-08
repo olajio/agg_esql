@@ -55,9 +55,10 @@ POST /_query?format=csv
       AND agent.version != "8.19.4"
     | STATS agent.version = VALUES(agent.version),
             cloud.account.name = VALUES(cloud.account.name),
-            labels.app_code = VALUES(labels.app_code)
+            labels.app_code = VALUES(labels.app_code),
+            cloud.region = VALUES(cloud.region)
         BY host.hostname
-    | KEEP host.hostname, cloud.account.name, labels.app_code, agent.version
+    | KEEP host.hostname, cloud.account.name, cloud.region, labels.app_code, agent.version
     | SORT host.hostname ASC
     | LIMIT 1000
   """
