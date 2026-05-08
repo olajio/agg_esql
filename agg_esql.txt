@@ -46,6 +46,7 @@ GET *:metricbeat-*-mt-*/_search
             "size": 1,
             "_source": {
               "include": [
+                "cloud.account.name",
                 "labels.app_code",
                 "agent.version"
               ]
