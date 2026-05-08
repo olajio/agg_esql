@@ -1,0 +1,69 @@
+GET *:filebeat-*-mt-*/_search
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gt": "now-7d"
+            }
+          }
+        },
+        {
+          "exists": {
+            "field": "cloud.account.id"
+          }
+        },
+        {
+          "exists": {
+            "field": "agent.version"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "bool": {
+            "minimum_should_match": 1,
+            "should": [
+              {
+                "match_phrase": {
+                  "agent.version": "8.19.5"
+                }
+              },
+              {
+                "match_phrase": {
+                  "agent.version": "8.19.4"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "Hosts": {
+      "terms": {
+        "field": "host.hostname",
+        "size": 1000
+      },
+      "aggs": {
+        "AgentVersion": {
+          "top_hits": {
+            "size": 1,
+            "_source": {
+              "include": [
+                "cloud.account.id",
+                "cloud.account.name",
+                "labels.app_code",
+                "agent.version"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
