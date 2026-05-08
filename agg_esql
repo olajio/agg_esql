@@ -1,0 +1,57 @@
+GET *:metricbeat-*-mt-*/_search
+{
+  "track_total_hits": true,
+  "size": 0,
+  "query": {
+    "bool": {
+      "must": [],
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gt": "now-7d"
+            }
+          }
+        },
+        {
+          "exists": {
+            "field": "cloud.account.id"
+          }
+        },
+        {
+          "exists": {
+            "field": "agent.version"
+          }
+        }
+      ],
+      "should": [],
+      "must_not": [
+        {
+          "match_phrase": {
+            "agent.version": "8.19.4"
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "Hosts": {
+      "terms": {
+        "field": "host.hostname",
+        "size": 1000
+      },
+      "aggs": {
+        "AgentVersion": {
+          "top_hits": {
+            "size": 1,
+            "_source": {
+              "include": [
+                "agent.version"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
